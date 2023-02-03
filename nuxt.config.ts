@@ -3,7 +3,8 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxt/image-edge',
-    '@nuxtjs/color-mode'
+    '@nuxtjs/color-mode',
+    'nuxt-icon'
   ],
   image: {
     presets: {
@@ -20,5 +21,8 @@ export default defineNuxtConfig({
     preference: 'system',
     fallback: 'light',
     classSuffix: ''
+  },
+  nuxtIcon: {
+    size: '24px'
   }
 });

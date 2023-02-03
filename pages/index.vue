@@ -2,8 +2,11 @@
 
 <template>
   <div>
-    Page: foo
+    <p>Homepage</p>
+    <Icon name="uil:github" />
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+
+</style>
