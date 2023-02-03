@@ -1,9 +1,10 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+const user = useSupabaseUser();
+</script>
 
 <template>
-  <div>
-    <p>Homepage</p>
-  </div>
+  <Auth v-if="!user" />
+  <Dashboard v-else />
 </template>
 
 <style scoped>
