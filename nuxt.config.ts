@@ -3,9 +3,9 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxt/image-edge',
+    '@nuxtjs/color-mode'
   ],
   image: {
-    dir: 'assets/images',
     presets: {
       avatar: {
         modifiers: {
@@ -15,5 +15,10 @@ export default defineNuxtConfig({
         }
       }
     }
+  },
+  colorMode: {
+    preference: 'system',
+    fallback: 'light',
+    classSuffix: ''
   }
 });
