@@ -3,7 +3,6 @@
 <template>
   <div>
     <p>Homepage</p>
-    <Icon name="uil:github" />
   </div>
 </template>
 

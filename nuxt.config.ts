@@ -4,6 +4,7 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@nuxt/image-edge',
     '@nuxtjs/color-mode',
+    '@nuxtjs/supabase',
     'nuxt-icon'
   ],
   image: {
