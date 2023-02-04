@@ -1,6 +1,10 @@
 <script lang="ts" setup>
 import { z } from 'zod';
 import type { Provider } from '@supabase/supabase-js';
+import type { Ref } from 'vue';
+
+// CONSTANTS
+const MIN_PW_LENGTH = 14;
 
 // INPUT VALUES
 const email = ref('');
@@ -8,7 +12,12 @@ const password = ref('');
 const passwordConfirm = ref('');
 
 // INPUT ERRORS
-const errors = {
+const errors: {
+  email: Ref<string[]>,
+  password: Ref<string[]>,
+  passwordConfirmation: Ref<string[]>;
+}
+  = {
   email: ref([]),
   password: ref([]),
   passwordConfirmation: ref([]),
@@ -21,13 +30,13 @@ const toggleMethod = () => {
 };
 
 // NEW PASSWORD VALIDATION CONSTANTS
-const newPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+const newPasswordRegex = new RegExp(`/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{${MIN_PW_LENGTH},}$/`);
 const newPasswordInvalidMessage = 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter and one number';
 
 // FORM INPUT SCHEMAS
 const signInSchema = z.object({
   email: z.string().trim().email(),
-  password: z.string().min(8),
+  password: z.string().min(MIN_PW_LENGTH),
 });
 const signUpSchema = z.object({
   email: z.string().trim().email(),
@@ -36,6 +45,26 @@ const signUpSchema = z.object({
 }).refine((data) => data.password === passwordConfirm.value, {
   message: 'Passwords must match',
   path: ['passwordConfirmation'],
+});
+
+// FORM VALIDATION
+const isSignInValid = computed(() => {
+  if (email.value === '' || password.value === '') return false;
+  const result = signInSchema.safeParse({
+    email: email.value,
+    password: password.value,
+  });
+  return result.success;
+});
+
+const isSignUpValid = computed(() => {
+  console.log('isSignUpValid');
+  const result = signUpSchema.safeParse({
+    email: email.value,
+    password: password.value,
+    passwordConfirmation: passwordConfirm.value,
+  });
+  return result.success;
 });
 
 // SIGN IN METHODS
@@ -125,33 +154,115 @@ const handleSubmit = async () => {
               </div>
             </div>
           </div>
-          <AuthSignInWithEmailAndPassword v-if="isSigningIn" :email="email" :password="password" :errors="errors" />
-          <AuthSignUpEmailAndPassword v-else :email="email" :password="password" :passwordConfirm="passwordConfirm" />
+          <div v-if="isSigningIn">
+            <div class="mt-6">
+              <div class="space-y-6">
+                <div>
+                  <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                  <div class="mt-1">
+                    <input v-model="email" id="email" name="email" type="email" autocomplete="email" required
+                      class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm" />
+                  </div>
+                  <ul v-if="errors.email.value.length" class="mt-2 text-sm text-red-600 list-disc list-inside">
+                    <li v-for="error in errors.email">{{ error }}</li>
+                  </ul>
+                </div>
+
+                <div class="space-y-1">
+                  <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                  <div class="mt-1">
+                    <input v-model="password" id="password" name="password" type="password"
+                      autocomplete="current-password" required
+                      class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm" />
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <input id="remember-me" name="remember-me" type="checkbox"
+                      class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                    <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
+                  </div>
+
+                  <div class="text-sm">
+                    <a href="/forgot" class="font-medium text-indigo-600 hover:text-indigo-500">Forgot your
+                      password?</a>
+                  </div>
+                </div>
+                <!-- Sign In Button -->
+                <div>
+                  <button type="submit" :disabled="!isSignInValid"
+                    class="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400">
+                    Sign in
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else>
+            <div class="mt-6">
+              <div class="space-y-6">
+                <div>
+                  <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                  <div class="mt-1">
+                    <input v-model="email" id="email" name="email" type="email" autocomplete="email" required
+                      class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm" />
+                  </div>
+                  <ul v-if="errors.email.value.length" class="mt-2 text-sm text-red-600 list-disc list-inside">
+                    <li v-for="error in errors.email">{{ error }}</li>
+                  </ul>
+                </div>
+
+                <div class="space-y-1">
+                  <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                  <div class="mt-1">
+                    <input id="password" name="password" type="password" autocomplete="off" v-model="password" required
+                      class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm" />
+                  </div>
+                  <ul v-if="errors.password.value.length" class="mt-2 text-sm text-red-600 list-disc list-inside">
+                    <li v-for="error in errors.password">{{ error }}</li>
+                  </ul>
+                </div>
+
+                <div class="space-y-1">
+                  <label for="confirm-password" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                  <div class="mt-1">
+                    <input id="confirm-password" name="confirm-password" type="password" autocomplete="off"
+                      v-model="passwordConfirm" required
+                      class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm" />
+                  </div>
+                  <ul v-if="errors.passwordConfirmation.value.length"
+                    class="mt-2 text-sm text-red-600 list-disc list-inside">
+                    <li v-for="error in errors.passwordConfirmation.value">{{ error }}</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <button type="submit" :disabled="!isSignUpValid"
+                    class="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400">
+                    Sign up
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
           <!-- "Sign in instead" option -->
           <div class="mt-6">
             <div class="relative">
               <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-gray-300" />
+                <div class="w-full border-t border-gray-300"></div>
               </div>
               <div class="relative flex justify-center text-sm">
                 <span class="px-2 bg-white text-gray-500">
-                  {#if signIn}
-                  Don't have an account?
-                  {:else}
-                  Already have an account?
-                  {/if}
+                  {{ isSigningIn? `Don't have an account?` : 'Already have an account?' }}
                 </span>
               </div>
             </div>
 
             <div class="mt-6">
-              <button type="button" on:click={toggleMethod}
+              <button type="button" @click="toggleMethod"
                 class="w-full flex justify-center rounded-md border border-gray-300 px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                {#if signIn}
-                Sign up instead
-                {:else}
-                Sign in instead
-                {/if}
+                {{ isSigningIn? 'Sign up instead': 'Sign in instead' }}
               </button>
             </div>
           </div>
