@@ -1,1 +1,8 @@
-archived_work
+node_modules
+*.log*
+.nuxt
+.nitro
+.cache
+.output
+.env
+dist
